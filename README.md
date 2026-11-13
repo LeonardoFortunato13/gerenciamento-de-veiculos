@@ -131,13 +131,13 @@ Escolha uma opção:
  
 ---
  
-## 🏗️ Requisitos de arquitetura
+##  Requisitos de arquitetura
  
 - O projeto deve conter **classes que resolvem cada enunciado** e **retornam os dados para a função `Main`**.
 - A leitura, o processamento e a impressão devem ficar **separados**: as classes calculam e retornam, o `Main` exibe.
 ---
  
-## 🗺️ Regiões e Estados
+##  Regiões e Estados
  
 | Região | Estados |
 |---|---|
