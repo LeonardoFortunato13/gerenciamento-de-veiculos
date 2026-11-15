@@ -15,6 +15,7 @@ namespace GerenciamentoDeVeiculos
     {
         string regiaoAtual;
         string[] estados = { };
+        RelatorioPorAno relatorioAno;   // itens 3 e 4
 
         public Form1()
         {
@@ -34,35 +35,13 @@ namespace GerenciamentoDeVeiculos
             comboBoxOpcoesFiltro.Items.Add("Valor médio");
             comboBoxOpcoesFiltro.SelectedIndex = 0;
 
-            //poderia ser uma lista?  Sim , mas é oq temos #fé
-
-            Anos.Items.Add("2000");
-            Anos.Items.Add("2001");
-            Anos.Items.Add("2002");
-            Anos.Items.Add("2003");
-            Anos.Items.Add("2004");
-            Anos.Items.Add("2005");
-            Anos.Items.Add("2006");
-            Anos.Items.Add("2007");
-            Anos.Items.Add("2008");
-            Anos.Items.Add("2009");
-            Anos.Items.Add("2010");
-            Anos.Items.Add("2011");
-            Anos.Items.Add("2012");
-            Anos.Items.Add("2013");
-            Anos.Items.Add("2014");
-            Anos.Items.Add("2015");
-            Anos.Items.Add("2016");
-            Anos.Items.Add("2017");
-            Anos.Items.Add("2018");
-            Anos.Items.Add("2019");
-            Anos.Items.Add("2020");
-            Anos.Items.Add("2021");
-            Anos.Items.Add("2022");
-            Anos.Items.Add("2023");
-            Anos.Items.Add("2024");
-            Anos.Items.Add("2025");
-            Anos.Items.Add("2026");
+            // Item 3: a lista de anos vem dos próprios dados,
+            // do carro mais velho (4.2) ao mais novo (4.1)
+            relatorioAno = new RelatorioPorAno(veiculos);
+            for (int ano = relatorioAno.AnoMaisVelho(); ano <= relatorioAno.AnoMaisNovo(); ano++)
+            {
+                Anos.Items.Add(ano.ToString());
+            }
             Anos.SelectedIndex = 0;
 
         }
@@ -138,9 +117,15 @@ namespace GerenciamentoDeVeiculos
             }
 
 
+            // Item 3: a classe RelatorioPorAno filtra e devolve a lista; a tela só exibe
             int anoSelecionado = int.Parse(Anos.SelectedItem.ToString());
-            List<Veiculo> veiculosFiltrados = veiculos.FindAll(i => i.Ano == anoSelecionado);
+            List<Veiculo> veiculosFiltrados = relatorioAno.FiltrarPorAno(anoSelecionado);
             dgv_Exibir.DataSource = veiculosFiltrados;
+
+            if (veiculosFiltrados.Count == 0)
+            {
+                MessageBox.Show("Nenhum carro fabricado em " + anoSelecionado + ".");
+            }
         }
 
 
@@ -363,23 +348,17 @@ namespace GerenciamentoDeVeiculos
         private void GerarRelatorioFrequencia(object sender, EventArgs e)
         {
 
-            var carrosPorAno = veiculos.GroupBy(c => c.Ano).Select(v =>
-            {
-                var qtdAno = veiculos.FindAll(c => c.Ano == v.Key);
-              
+            // Item 4: a classe RelatorioPorAno calcula; a tela só exibe
+            int maisNovo = relatorioAno.AnoMaisNovo();     // 4.1
+            int maisVelho = relatorioAno.AnoMaisVelho();   // 4.2
+            List<FrequenciaAno> frequencia = relatorioAno.FrequenciaPorAno();   // 4.3
 
-                return new
-                {
-                    CarrosFabricados = qtdAno.Count,
-                    Ano = v.Key
+            dgv_Exibir.DataSource = frequencia;
 
-                };
-            }).OrderBy(c => c.Ano).ToList();
-
-            dgv_Exibir.DataSource = carrosPorAno;
-            
-
-
+            MessageBox.Show(
+                "Ano do carro mais novo: " + maisNovo + "\n" +
+                "Ano do carro mais velho: " + maisVelho,
+                "Relatório de frequência por ano");
         }
 
         private void BuscarVeiculos(object sender, EventArgs e)
