@@ -13,16 +13,57 @@ namespace GerenciamentoDeVeiculos
 {
     public partial class Form1 : Form
     {
+        string regiaoAtual;
+        string[] estados = { };
+
         public Form1()
         {
             InitializeComponent();
             dgv_Exibir.DataSource = veiculos;
+            comboBox1.Items.Add("Todas");
             comboBox1.Items.Add("Sul");
             comboBox1.Items.Add("Nordeste");
             comboBox1.Items.Add("Norte");
             comboBox1.Items.Add("Centro-Oeste");
             comboBox1.Items.Add("Sudeste");
+            comboBox1.SelectedIndex = 0;
+               regiaoAtual = comboBox1.Text.ToLower();
 
+            comboBoxOpcoesFiltro.Items.Add("Calcular imposto");
+          
+            comboBoxOpcoesFiltro.Items.Add("Valor médio");
+            comboBoxOpcoesFiltro.SelectedIndex = 0;
+
+            //poderia ser uma lista?  Sim , mas é oq temos #fé
+
+            Anos.Items.Add("2000");
+            Anos.Items.Add("2001");
+            Anos.Items.Add("2002");
+            Anos.Items.Add("2003");
+            Anos.Items.Add("2004");
+            Anos.Items.Add("2005");
+            Anos.Items.Add("2006");
+            Anos.Items.Add("2007");
+            Anos.Items.Add("2008");
+            Anos.Items.Add("2009");
+            Anos.Items.Add("2010");
+            Anos.Items.Add("2011");
+            Anos.Items.Add("2012");
+            Anos.Items.Add("2013");
+            Anos.Items.Add("2014");
+            Anos.Items.Add("2015");
+            Anos.Items.Add("2016");
+            Anos.Items.Add("2017");
+            Anos.Items.Add("2018");
+            Anos.Items.Add("2019");
+            Anos.Items.Add("2020");
+            Anos.Items.Add("2021");
+            Anos.Items.Add("2022");
+            Anos.Items.Add("2023");
+            Anos.Items.Add("2024");
+            Anos.Items.Add("2025");
+            Anos.Items.Add("2026");
+            Anos.SelectedIndex = 0;
 
         }
 
@@ -88,14 +129,66 @@ namespace GerenciamentoDeVeiculos
                 new Veiculo { Proprietario = "Reginaldo Antenor TerrAnobre", Uf = "RO", Placa = "RCG4009", Ano = 2019, Valor = 21246.64m }
         };
 
+        private void FiltrarPorAno(object sender, EventArgs e)
+        {
+            if (Anos.SelectedItem == null)
+            {
+                MessageBox.Show("Selecione um ano para filtrar.");
+                return;
+            }
 
+
+            int anoSelecionado = int.Parse(Anos.SelectedItem.ToString());
+            List<Veiculo> veiculosFiltrados = veiculos.FindAll(i => i.Ano == anoSelecionado);
+            dgv_Exibir.DataSource = veiculosFiltrados;
+        }
+
+
+
+        private string[] ObterEstadosPorRegiao(string regiao)
+        {
+            switch (regiao.ToLowerInvariant())
+            {
+                case "todas":
+                    return new[] { "AC", "AP", "AM", "PA", "RO", "RR", "TO", "AC", "AP", "AM", "PA", "RO", "RR", "TO", "AL", "BA", "CE", "MA", "PB", "PE", "PI", "RN", "SE", "DF", "GO", "MT", "MS", "ES", "MG", "RJ", "SP", "PR", "SC", "RS" };
+                case "norte":
+                    return new[] { "AC", "AP", "AM", "PA", "RO", "RR", "TO" };
+                case "nordeste":
+                    return new[] { "AL", "BA", "CE", "MA", "PB", "PE", "PI", "RN", "SE" };
+                case "centro-oeste":
+                    return new[] { "DF", "GO", "MT", "MS" };
+                case "sudeste":
+                    return new[] { "ES", "MG", "RJ", "SP" };
+                case "sul":
+                    return new[] { "PR", "SC", "RS" };
+                default:
+                    return Array.Empty<string>();
+            }
+        }
+
+        private string ObterRegiaoPorUf(string uf)
+        {
+            if (new[] { "PR", "SC", "RS" }.Contains(uf)) return "Sul";
+            if (new[] { "ES", "MG", "RJ", "SP" }.Contains(uf)) return "Sudeste";
+            if (new[] { "DF", "GO", "MT", "MS" }.Contains(uf)) return "Centro-Oeste";
+            if (new[] { "AC", "AP", "AM", "PA", "RO", "RR", "TO" }.Contains(uf)) return "Norte";
+            if (new[] { "AL", "BA", "CE", "MA", "PB", "PE", "PI", "RN", "SE" }.Contains(uf)) return "Nordeste";
+            return "Outra";
+        }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            string regiao = comboBox1.SelectedItem.ToString().ToLower();
+            if (comboBox1.SelectedItem == null)
+                return;
 
+            regiaoAtual = comboBox1.SelectedItem.ToString().ToLower();
+            estados = ObterEstadosPorRegiao(regiaoAtual);
+        
+        }
 
-
+        private void comboBoxOpcoesFiltro_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string opcao = comboBoxOpcoesFiltro.SelectedItem.ToString();
         }
 
         //recebe os estados -> filtra -> exibe no gridview
@@ -104,75 +197,126 @@ namespace GerenciamentoDeVeiculos
 
         }
 
-        private void FiltrarRegiao(object sender, EventArgs e)
+        public void FiltrarRegiao(string regiao)
         {
-
-
             if (comboBox1.SelectedItem == null)
             {
                 MessageBox.Show("Selecione uma região para filtrar.");
                 return;
             }
 
-            string regiaoAtual = comboBox1.Text.ToLower();
-            string[] estados = { };
-            List<Veiculo> veiculosFiltrados = new List<Veiculo>();
 
+            estados = ObterEstadosPorRegiao(regiao);
 
-
-            switch (regiaoAtual)
-
+            if (estados.Length == 0)
             {
-                case "norte":
-                    estados = new string[] { "AC", "AP", "AM", "PA", "RO", "RR", "TO" };
-
-                    veiculosFiltrados = veiculos.FindAll(i => estados.Contains(i.Uf));
-                    dgv_Exibir.DataSource = veiculosFiltrados;
-                    break;
-
-
-                case "nordeste":
-                    estados = new string[] { "AL", "BA", "CE", "MA", "PB", "PE", "PI", "RN", "SE" };
-
-
-                    veiculosFiltrados = veiculos.FindAll(i => estados.Contains(i.Uf));
-                    dgv_Exibir.DataSource = veiculosFiltrados;
-                    break;
-
-
-
-                case "centro-oeste":
-                    estados = new string[] { "DF", "GO", "MT", "MS" };
-
-                    veiculosFiltrados = veiculos.FindAll(i => estados.Contains(i.Uf));
-                    dgv_Exibir.DataSource = veiculosFiltrados;
-                    break;
-
-                case "sudeste":
-                    estados = new string[] { "ES", "MG", "RJ", "SP" };
-
-                    veiculosFiltrados = veiculos.FindAll(i => estados.Contains(i.Uf));
-                    dgv_Exibir.DataSource = veiculosFiltrados;
-                    break;
-
-                case "sul":
-                    estados = new string[] { "PR", "SC", "RS" };
-
-                    veiculosFiltrados = veiculos.FindAll(i => estados.Contains(i.Uf));
-                    dgv_Exibir.DataSource = veiculosFiltrados;
-                    break;
-
-                default:
-                    Console.WriteLine("Região inválida!");
-                    return;
+                MessageBox.Show("Região inválida!");
+                return;
             }
 
-            Console.WriteLine("Região selecionada: " + regiaoAtual);
+            var veiculosFiltrados = veiculos.Where(i => estados.Contains(i.Uf)).ToList();
+            dgv_Exibir.DataSource = veiculosFiltrados;
+        }
+        public void FiltrarPorValorMedio(string regiao)
+        {
+            if (comboBox1.SelectedItem == null)
+                return;
 
+            string regiaoSelecionada = comboBox1.SelectedItem.ToString();
+
+            var mediaGeral = veiculos.Average(v => v.Valor);
+
+            var mediaPorRegiao = veiculos
+                .GroupBy(v => ObterRegiaoPorUf(v.Uf))
+                .Select(g => new
+                {
+                    Regiao = g.Key,
+                    ValorMedio = g.Average(v => v.Valor)
+                })
+                .ToList();
+
+            var resultado = new List<object>();
+
+            resultado.Add(new
+            {
+                Regiao = "Todas",
+                ValorMedio = mediaGeral
+            });
+
+            foreach (var item in mediaPorRegiao)
+            {
+                resultado.Add(new
+                {
+                    Regiao = item.Regiao,
+                    ValorMedio = item.ValorMedio
+                });
+            }
+
+            dgv_Exibir.DataSource = resultado
+                .Select(x => new
+                {
+                    Regiao = x.GetType().GetProperty("Regiao").GetValue(x),
+                    ValorMedio = ((decimal)x.GetType().GetProperty("ValorMedio").GetValue(x)).ToString("C2", new CultureInfo("pt-BR"))
+                })
+                .ToList();
         }
 
+        public void CalcularImposto(string regiao)
+        {
+
+            var resultadoComImposto = veiculos.Where(v => estados.Contains(v.Uf)).Select(v => {
+                decimal percentual = 0;
+                int idadeLimite = 0;
+
+                DateTime data = DateTime.Now;
+                int anoAtual = data.Year;
+                int idade = anoAtual - v.Ano;
+                estados = ObterEstadosPorRegiao(regiao);
 
 
+                if (estados.Contains(v.Uf))
+                {
+                    percentual = 0.035m; // Sul (3,5%)
+                    idadeLimite = 12;
+                }
+                else if (estados.Contains(v.Uf))
+                {
+                    percentual = 0.045m; // Sudeste (4,5%)
+                    idadeLimite = 14;
+                }
+                else if (estados.Contains(v.Uf))
+                {
+                    percentual = 0.052m; // Centro-Oeste (5,2%)
+                    idadeLimite = 16;
+                }
+                else if (estados.Contains(v.Uf))
+                {
+                    percentual = 0.048m; // Norte (4,8%)
+                    idadeLimite = 11;
+                }
+                else if (estados.Contains(v.Uf))
+                {
+                    percentual = 0.049m; // Nordeste (4,9%)
+                    idadeLimite = 15;
+                }
+
+                decimal valorImposto = v.Valor * percentual;
+
+                return new
+                {
+                    v.Proprietario,
+                    v.Uf,
+                    v.Placa,
+                    v.Ano,
+                    v.Valor,
+                    Imposto = v.Valor <= 20000 ? "Isento" : idade >= idadeLimite ? "Insento" : (valorImposto).ToString("C2", new CultureInfo("pt-BR"))
+                };
+            }).ToList();
+
+
+
+            dgv_Exibir.DataSource = resultadoComImposto;
+        }
 
         private void ExibirDados(object sender, DataGridViewCellEventArgs e)
         {
@@ -182,67 +326,95 @@ namespace GerenciamentoDeVeiculos
         private void btn_calcularImposto(object sender, EventArgs e)
         {
 
-            
-         
-            // Percorre todos os veículos da lista geral
-            var resultadoComImposto = veiculos.Select(v => {
-                decimal percentual = 0;
-                int idadeLimite = 0;
+   
+
+        }
+
+       
+
+
+
+        private void label1_Click(object sender, EventArgs e)
+
+        {
+
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Anos_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btn_filtrarPorAno_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void GerarRelatorioFrequencia(object sender, EventArgs e)
+        {
+
+            var carrosPorAno = veiculos.GroupBy(c => c.Ano).Select(v =>
+            {
+                var qtdAno = veiculos.FindAll(c => c.Ano == v.Key);
               
-                DateTime data = DateTime.Now;
-                int anoAtual = data.Year;
-                int idade = anoAtual - v.Ano;
 
-
-                // Identifica o percentual com base na UF do veículo
-                if (new string[] { "PR", "SC", "RS" }.Contains(v.Uf))
-                {
-                    percentual = 0.035m; // Sul (3,5%)
-                    idadeLimite = 12;
-                }
-                else if (new string[] { "ES", "MG", "RJ", "SP" }.Contains(v.Uf))
-                {
-                    percentual = 0.045m; // Sudeste (4,5%)
-                    idadeLimite = 14;
-                }
-                else if (new string[] { "DF", "GO", "MT", "MS" }.Contains(v.Uf))
-                {
-                    percentual = 0.052m; // Centro-Oeste (5,2%)
-                    idadeLimite = 16;
-                }
-                else if (new string[] { "AC", "AP", "AM", "PA", "RO", "RR", "TO" }.Contains(v.Uf))
-                {
-                    percentual = 0.048m; // Norte (4,8%)
-                    idadeLimite = 11;
-                }
-                else if (new string[] { "AL", "BA", "CE", "MA", "PB", "PE", "PI", "RN", "SE" }.Contains(v.Uf))
-                {
-                    percentual = 0.049m; // Nordeste (4,9%)
-                    idadeLimite = 15;
-                }
-
-                // Calcula o valor do imposto (supondo que seu objeto Veiculo tenha uma propriedade 'Valor')
-                decimal valorImposto = v.Valor * percentual;
-
-                // Retorna um objeto organizando as colunas (a 6ª será o valor do imposto)
                 return new
                 {
-                    v.Proprietario,   // 1ª Coluna (exemplo)
-                    v.Uf,    // 2ª Coluna (exemplo)
-                    v.Placa,      // 3ª Coluna (exemplo)
-                    v.Ano,       // 4ª Coluna (exemplo)
-                    v.Valor,    // 5ª Coluna (exemplo)
-                    Imposto = v.Valor <= 20000 ? "Isento" : idade>=idadeLimite ? "Insento":(valorImposto).ToString("C2", new CultureInfo("pt-BR"))
-                };
-            }).ToList();
+                    CarrosFabricados = qtdAno.Count,
+                    Ano = v.Key
 
-            // Joga o resultado no DataGridView
-     
-            dgv_Exibir.DataSource = resultadoComImposto;
-        
+                };
+            }).OrderBy(c => c.Ano).ToList();
+
+            dgv_Exibir.DataSource = carrosPorAno;
+            
+
+
+        }
+
+        private void BuscarVeiculos(object sender, EventArgs e)
+        {
+            
+                if (comboBox1.SelectedItem == null)
+                {
+                    MessageBox.Show("Selecione uma região.");
+                    return;
+                }
+
+                string regiao = comboBox1.SelectedItem.ToString();
+
+            switch (comboBoxOpcoesFiltro.SelectedItem?.ToString())
+            {
+                case "Calcular imposto":
+                    CalcularImposto(regiao);
+                    break;
+
+                case "Valor médio":
+                    FiltrarPorValorMedio(regiao);
+                    break;
+
+                case "Por Regiões":
+                    FiltrarRegiao(regiao);
+                    break;
+            }
+
+        }
+
+        private void btn_FiltrarRegiao(object sender, EventArgs e)
+        {
+
+        }
     }
-    
-    
-    }
+
 
 }
